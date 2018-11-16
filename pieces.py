@@ -25,6 +25,12 @@ class Pawn(Piece):
             return True
         return False
 
+    def can_attack(self, current_pos, prey_pos):
+        diagonal_move = abs(current_pos[0] - prey_pos[0]) == abs(current_pos[1] - prey_pos[1]) == 1
+        if self.color == (0, 255, 0):
+            return diagonal_move and current_pos[1] > prey_pos[1]
+        return diagonal_move and current_pos[1] < prey_pos[1]
+
 
 class Knight(Piece):
     @staticmethod
@@ -33,17 +39,26 @@ class Knight(Piece):
         abs_y = abs(current_pos[1] - new_pos[1])
         return abs_x == 1 and abs_y == 2 or abs_x == 2 and abs_y == 1
 
+    def can_attack(self, current_pos, prey_pos):
+        return self.can_move(current_pos, prey_pos)
+
 
 class Bishop(Piece):
     @staticmethod
     def can_move(current_pos, new_pos):
         return abs(current_pos[0] - new_pos[0]) == abs(current_pos[1] - new_pos[1])
 
+    def can_attack(self, current_pos, prey_pos):
+        return self.can_move(current_pos, prey_pos)
+
 
 class Rock(Piece):
     @staticmethod
     def can_move(current_pos, new_pos):
         return current_pos[0] == new_pos[0] or current_pos[1] == new_pos[1]
+
+    def can_attack(self, current_pos, prey_pos):
+        return self.can_move(current_pos, prey_pos)
 
 
 class Queen(Piece):
@@ -54,11 +69,17 @@ class Queen(Piece):
         truthy.append(abs(current_pos[0] - new_pos[0]) == abs(current_pos[1] - new_pos[1]))
         return any(truthy)
 
+    def can_attack(self, current_pos, prey_pos):
+        return self.can_move(current_pos, prey_pos)
+
 
 class King(Piece):
     @staticmethod
     def can_move(current_pos, new_pos):
         return abs(current_pos[0] - new_pos[0]) in [0, 1] and abs(current_pos[1] - new_pos[1]) in [0, 1]
+
+    def can_attack(self, current_pos, prey_pos):
+        return self.can_move(current_pos, prey_pos)
 
 
 class PieceFactory(object):
