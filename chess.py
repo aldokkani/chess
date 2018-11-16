@@ -56,14 +56,14 @@ class Chess(object):
     def move_piece(self, pos):
         x = math.floor(pos[0] / 100 % 10)
         y = math.floor(pos[1] / 100 % 10)
-        print(x, y, x + y)
+        # print(x, y, x + y)
 
         if (x, y) in self.pieces_on_board:
             if self.piece_to_move:
                 piece = self.pieces_on_board[self.piece_to_move]
                 prey = self.pieces_on_board[(x, y)]
                 attack_itself_or_team = self.piece_to_move == (x, y) or piece.color == prey.color
-                if not attack_itself_or_team and piece.can_attack(self.piece_to_move, (x, y)):
+                if not attack_itself_or_team and piece.can_attack(self.piece_to_move, (x, y), self.pieces_on_board):
                     # Clear the new square
                     self.draw_square((x, y))
 
@@ -82,7 +82,7 @@ class Chess(object):
 
         elif self.piece_to_move:
             piece = self.pieces_on_board[self.piece_to_move]
-            if piece.can_move(self.piece_to_move, (x, y)):
+            if piece.can_move(self.piece_to_move, (x, y), self.pieces_on_board):
                 self.draw_piece(piece, (x, y))
                 self.pieces_on_board.update({(x, y): piece})
                 # Clear the old square
