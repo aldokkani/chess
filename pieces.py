@@ -2,18 +2,19 @@ import sys
 
 
 class Piece(object):
-    def __init__(self, type_, color):
-        self.type = type_
-        # If color == True then it's a white piece else it's a black piece.
-        self.color = (0, 255, 0) if color else (0, 0, 255)
+    def __init__(self, name, color):
+        self.name = name
+        self.color = color
+        theme1, theme2 = 'cheq', 'merida'
+        self.image = f'images/{theme1}/{color}{name}.png'
 
 
 class Pawn(Piece):
     moved = False
 
     def can_move(self, current_pos, new_pos):
-        good_white = current_pos[0] == new_pos[0] and self.color == (0, 255, 0)
-        good_black = current_pos[0] == new_pos[0] and self.color == (0, 0, 255)
+        good_white = current_pos[0] == new_pos[0] and self.color == 'White'
+        good_black = current_pos[0] == new_pos[0] and self.color == 'Black'
 
         truthy = list([good_white and current_pos[1] == new_pos[1] + 1])
         truthy.append(good_white and not self.moved and current_pos[1] == new_pos[1] + 2)
@@ -27,7 +28,7 @@ class Pawn(Piece):
 
     def can_attack(self, current_pos, prey_pos):
         diagonal_move = abs(current_pos[0] - prey_pos[0]) == abs(current_pos[1] - prey_pos[1]) == 1
-        if self.color == (0, 255, 0):
+        if self.color == 'White':
             return diagonal_move and current_pos[1] > prey_pos[1]
         return diagonal_move and current_pos[1] < prey_pos[1]
 
@@ -52,7 +53,7 @@ class Bishop(Piece):
         return self.can_move(current_pos, prey_pos)
 
 
-class Rock(Piece):
+class Rook(Piece):
     @staticmethod
     def can_move(current_pos, new_pos):
         return current_pos[0] == new_pos[0] or current_pos[1] == new_pos[1]

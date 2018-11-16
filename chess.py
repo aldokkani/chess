@@ -5,7 +5,7 @@ from pieces import *
 
 class Chess(object):
     colors = {
-        "black": (0, 0, 0),
+        "black": (100, 100, 100),
         "white": (255, 255, 255),
         "red": (255, 0, 0),
         "green": (0, 255, 0),
@@ -99,21 +99,20 @@ class Chess(object):
         self.board.blit(cell, cellpos)
 
     def draw_piece(self, piece, pos):
-        font = pygame.font.Font(None, 30)
-        text = font.render(piece.type, 1, piece.color)
-        textpos = text.get_rect()
-        textpos.centerx = pos[0] * 100 + 50
-        textpos.centery = pos[1] * 100 + 50
-        self.board.blit(text, textpos)
+        image = pygame.image.load(piece.image).convert_alpha()
+        imagepos = image.get_rect()
+        imagepos.centerx = pos[0] * 100 + 50
+        imagepos.centery = pos[1] * 100 + 50
+        self.board.blit(image, imagepos)
 
     def init_setup(self):
-        pieces = ['Rock', 'Knight', 'Bishop', 'Queen', 'King', 'Bishop', 'Knight', 'Rock']
+        pieces = ['Rook', 'Knight', 'Bishop', 'Queen', 'King', 'Bishop', 'Knight', 'Rook']
 
         for i, p in enumerate(pieces):
-            black_piece = PieceFactory.get_piece(p, False)
-            black_pawn = PieceFactory.get_piece('Pawn', False)
-            white_piece = PieceFactory.get_piece(p, True)
-            white_pawn = PieceFactory.get_piece('Pawn', True)
+            black_piece = PieceFactory.get_piece(p, 'Black')
+            black_pawn = PieceFactory.get_piece('Pawn', 'Black')
+            white_piece = PieceFactory.get_piece(p, 'White')
+            white_pawn = PieceFactory.get_piece('Pawn', 'White')
 
             self.draw_piece(black_piece, (i, 0))
             self.draw_piece(black_pawn, (i, 1))
