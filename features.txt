@@ -1,0 +1,6 @@
+- En passant
+- Check
+- Castling
+- Turns
+- Timing
+- Control buttons

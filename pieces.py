@@ -110,9 +110,18 @@ class Queen(Piece, BlockedPathInterface):
 
 
 class King(Piece):
-    @staticmethod
-    def can_move(current_pos, new_pos, _board):
-        return abs(current_pos[0] - new_pos[0]) in [0, 1] and abs(current_pos[1] - new_pos[1]) in [0, 1]
+    def can_move(self, current_pos, new_pos, board):
+        if abs(current_pos[0] - new_pos[0]) not in [0, 1] or abs(current_pos[1] - new_pos[1]) not in [0, 1]:
+            return False
+        for pos, p in board.items():
+            if p.color != self.color and p.name == "King":
+                new_board = board.copy()
+                new_board.pop(current_pos)
+                if p.can_attack(pos, new_pos, new_board):
+                    return False
+            elif p.color != self.color and p.can_attack(pos, new_pos, board):
+                return False
+        return True
 
     def can_attack(self, current_pos, prey_pos, board):
         return self.can_move(current_pos, prey_pos, board)

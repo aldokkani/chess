@@ -13,6 +13,11 @@ class Chess(object):
     }
     pieces_on_board = {}
     piece_to_move = None
+    kings_pos = {
+        "White": (4, 7),
+        "Black": (4, 0)
+    }
+    king_in_check = None
 
     def __init__(self):
         pygame.init()
@@ -49,14 +54,58 @@ class Chess(object):
             self.screen.blit(self.board, (0, 0))
             pygame.display.flip()
 
-    def highlight_square(self, pos, remove=False):
-        self.draw_square(pos, None if remove else self.colors['green'])
+    def highlight_square(self, pos, color):
+        self.draw_square(pos, color)
         self.draw_piece(self.pieces_on_board[pos], pos)
+
+    def update_kings_pos(self, king_color, pos):
+        self.kings_pos[king_color] = pos
+        self.king_in_check = None
+
+    def king_is_safe(self, piece, pos):
+        if self.king_in_check == self.piece_to_move:
+            return True
+        self.pieces_on_board.update({pos: piece})
+        for position, p in self.pieces_on_board.items():
+            if p.color != piece.color:
+                if p.can_attack(position, self.king_in_check, self.pieces_on_board):
+                    self.pieces_on_board.pop(pos)
+                    return False
+
+        self.highlight_square(self.king_in_check, color=None)
+        self.king_in_check = None
+        return True
+
+    def put_king_in_check(self, king_pos):
+        self.highlight_square(king_pos, color=self.colors['red'])
+        self.king_in_check = king_pos
+
+    def make_a_move(self, piece, pos):
+        if self.king_in_check is not None and not self.king_is_safe(piece, pos):
+            self.highlight_square(self.piece_to_move, color=None)
+            return
+
+        # Update king's pos
+        if piece.name == 'King':
+            self.update_kings_pos(piece.color, pos)
+        # Check if king is in check
+        opposite_king_pos = self.kings_pos['Black' if piece.color == 'White' else 'White']
+        if piece.can_attack(pos, opposite_king_pos, self.pieces_on_board):
+            self.put_king_in_check(opposite_king_pos)
+
+        # Clear the new square and update it with the move
+        self.draw_square(pos)
+        self.draw_piece(piece, pos)
+        self.pieces_on_board.update({pos: piece})
+
+        # Clear the old square
+        self.draw_square(self.piece_to_move)
+        self.pieces_on_board.pop(self.piece_to_move)
 
     def move_piece(self, pos):
         x = math.floor(pos[0] / 100 % 10)
         y = math.floor(pos[1] / 100 % 10)
-        # print(x, y, x + y)
+        print(x, y, x + y)
 
         if (x, y) in self.pieces_on_board:
             if self.piece_to_move:
@@ -64,33 +113,21 @@ class Chess(object):
                 prey = self.pieces_on_board[(x, y)]
                 attack_itself_or_team = self.piece_to_move == (x, y) or piece.color == prey.color
                 if not attack_itself_or_team and piece.can_attack(self.piece_to_move, (x, y), self.pieces_on_board):
-                    # Clear the new square
-                    self.draw_square((x, y))
-
-                    self.draw_piece(piece, (x, y))
-                    self.pieces_on_board.update({(x, y): piece})
-
-                    # Clear the old square
-                    self.draw_square(self.piece_to_move)
-                    self.pieces_on_board.pop(self.piece_to_move)
+                    self.make_a_move(piece, (x, y))
                 else:
-                    self.highlight_square(self.piece_to_move, remove=True)
+                    self.highlight_square(self.piece_to_move, color=None)
                 self.piece_to_move = None
             else:
-                self.highlight_square((x, y))
+                self.highlight_square((x, y), color=self.colors['green'])
                 self.piece_to_move = (x, y)
 
         elif self.piece_to_move:
             piece = self.pieces_on_board[self.piece_to_move]
             if piece.can_move(self.piece_to_move, (x, y), self.pieces_on_board):
-                self.draw_piece(piece, (x, y))
-                self.pieces_on_board.update({(x, y): piece})
-                # Clear the old square
-                self.draw_square(self.piece_to_move)
-                self.pieces_on_board.pop(self.piece_to_move)
+                self.make_a_move(piece, (x, y))
 
             else:
-                self.highlight_square(self.piece_to_move, remove=True)
+                self.highlight_square(self.piece_to_move, color=None)
             self.piece_to_move = None
 
     def draw_square(self, pos, color=None):
